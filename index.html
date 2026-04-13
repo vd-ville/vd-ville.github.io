@@ -5,46 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VD-Ville AI Lab | Legal Analytics</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.6; margin: 0; padding: 40px 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 45px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #dee2e6; }
-        h1 { color: #002d72; border-bottom: 3px solid #002d72; padding-bottom: 15px; margin-bottom: 30px; font-size: 28px; }
-        h2 { color: #002d72; margin-top: 40px; font-size: 22px; }
-        .mission { font-size: 1.2em; color: #495057; font-weight: 500; margin-bottom: 35px; border-left: 5px solid #ced4da; padding-left: 20px; }
-        .feature-list { list-style: none; padding: 0; }
-        .feature-item { margin-bottom: 25px; padding: 20px; background: #fdfdfd; border: 1px solid #f1f1f1; border-radius: 6px; }
-        .feature-item strong { color: #0056b3; display: block; font-size: 18px; margin-bottom: 5px; }
-        .footer { margin-top: 50px; font-size: 0.85em; color: #6c757d; text-align: center; border-top: 1px solid #eee; padding-top: 25px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; color: #212529; line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #dee2e6; }
+        h1 { color: #002d72; border-bottom: 3px solid #002d72; padding-bottom: 10px; font-size: 24px; }
+        
+        /* Стили чата */
+        #chat-container { margin-top: 30px; border: 1px solid #ced4da; border-radius: 6px; height: 400px; display: flex; flex-direction: column; background: #fff; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .message { margin-bottom: 10px; padding: 10px; border-radius: 5px; }
+        .user-msg { background: #e7f3ff; align-self: flex-end; }
+        .ai-msg { background: #f1f1f1; align-self: flex-start; }
+        .input-area { display: flex; padding: 10px; gap: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; }
+        button { padding: 10px 20px; background: #002d72; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #001a44; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>VD-Ville AI Research Lab</h1>
-        <div class="mission">
-            "Applying advanced Large Language Models to streamline litigation analysis and procedural strategy."
-        </div>
         
-        <div class="feature-list">
-            <div class="feature-item">
-                <strong>Litigation Data Analysis</strong>
-                <p>Developing neural network-based tools for deep analysis of court decisions and identification of judicial patterns.</p>
-            </div>
-            <div class="feature-item">
-                <strong>Procedural Strategy Optimization</strong>
-                <p>Automating the construction of cassation and appeal arguments based on statutory interpretation and case law precedents.</p>
-            </div>
-            <div class="feature-item">
-                <strong>Legal Document Processing</strong>
-                <p>Fine-tuning specialized models for accurate extraction of legal facts and procedural risks from complex case files.</p>
+        <div id="chat-container">
+            <div id="messages"></div>
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Введите ваш юридический запрос...">
+                <button onclick="sendMessage()">Отправить</button>
             </div>
         </div>
 
-        <h2>Current Research Focus</h2>
-        <p>Our lab is currently exploring the integration of retrieval-augmented generation (RAG) within closed legal datasets to ensure high-fidelity analytical outputs without data leakage.</p>
-
-        <div class="footer">
-            &copy; 2026 VD-Ville AI Lab. Institutional Research Phase. <br>
-            Legal Tech Solutions.
+        <div class="footer" style="margin-top:20px; font-size: 12px; color: #666; text-align: center;">
+            &copy; 2026 VD-Ville AI Lab. Connected to Claude 3.5 Sonnet via API.
         </div>
     </div>
+
+    <script>
+        // ВСТАВЬТЕ ВАШ КЛЮЧ ТУТ
+        const apiKey = 'sk-ant-api03-LdJ...AwAA'; 
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const messagesDiv = document.getElementById('messages');
+            if (!input.value) return;
+
+            // Отображаем сообщение пользователя
+            messagesDiv.innerHTML += `<div class="message user-msg"><b>Вы:</b> ${input.value}</div>`;
+            const userText = input.value;
+            input.value = '';
+
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'x-api-key': apiKey,
+                        'anthropic-version': '2023-06-01',
+                        'content-type': 'application/json',
+                        'dangerously-allow-browser': 'true' // Нужно для прямых запросов из браузера
+                    },
+                    body: JSON.stringify({
+                        model: "claude-3-5-sonnet-20240620",
+                        max_tokens: 1024,
+                        messages: [{ role: "user", content: userText }]
+                    })
+                });
+
+                const data = await response.json();
+                const aiText = data.content[0].text;
+                messagesDiv.innerHTML += `<div class="message ai-msg"><b>Claude:</b> ${aiText}</div>`;
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } catch (error) {
+                messagesDiv.innerHTML += `<div class="message ai-msg" style="color:red">Ошибка: Проверьте ключ или доступ к API.</div>`;
+            }
+        }
+    </script>
 </body>
 </html>
