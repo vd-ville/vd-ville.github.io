@@ -9,7 +9,7 @@
 * **Document Synthesis:** Processing large-scale legal files (20MB+ PDF/DOCX) for rapid summarization and cross-referencing.
 
 ### Tech Stack
-* **Core:** Multi-LLM Orchestration (OpenAI API, Groq LPU).
+* **Core:** Multi-LLM Orchestration.
 * **Interface:** Chatbox / Custom API integrations.
 * **Focus:** Deep semantic analysis of legal documentation and automated drafting.
 
